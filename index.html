@@ -1,4 +1,4 @@
-<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<!DOCTYPE html>
 <html>
   <head>
     <title>AR Video with Hiro Marker</title>
@@ -11,9 +11,11 @@
     </style>
   </head>
   <body>
-    <!-- Hidden video element for autoplay compatibility -->
+
+    <!-- Hidden video element for AR video texture -->
     <video id="arVideo" autoplay muted loop playsinline crossorigin="anonymous" src="video.mp4"></video>
 
+    <!-- AR scene -->
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
       <a-marker preset="hiro">
         <a-video
@@ -24,8 +26,24 @@
           rotation="-90 0 0"
         ></a-video>
       </a-marker>
-
       <a-entity camera></a-entity>
     </a-scene>
+
+    <!-- Autofocus script -->
+    <script>
+      window.addEventListener('arjs-video-loaded', function () {
+        const video = document.querySelector('video');
+        if (video && video.srcObject) {
+          const track = video.srcObject.getVideoTracks()[0];
+          const capabilities = track.getCapabilities?.();
+          if (capabilities?.focusMode?.includes('continuous')) {
+            track.applyConstraints({
+              advanced: [{ focusMode: "continuous" }]
+            }).catch(e => console.warn("Autofocus not supported:", e));
+          }
+        }
+      });
+    </script>
+    
   </body>
 </html>
